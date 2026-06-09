@@ -1,20 +1,43 @@
 """
-Training pipeline — orchestrates the full ML workflow:
-  1. Data Ingestion  (download from GCS + train/test split)
-  2. Data Preprocessing  (encode, balance, feature select)
-  3. Model Training  (hyperparameter tuning + MLflow logging)
+hotel_prediction.pipelines.training_pipeline
+============================================
+End-to-end orchestration of the ML training workflow.
 
-Usage:
+This module acts as the entry point for executing the entire machine
+learning pipeline in sequence. It wires together the three core
+components:
+
+1. :class:`~hotel_prediction.components.data_ingestion.DataIngestion`
+   (Downloads data and splits it).
+2. :class:`~hotel_prediction.components.data_preprocessing.DataPreprocessor`
+   (Cleans, encodes, balances, and selects features).
+3. :class:`~hotel_prediction.components.model_trainer.ModelTrainer`
+   (Tunes hyperparameters, trains, evaluates, and logs to MLflow).
+
+Reusable
+--------
+run_training_pipeline : Execute the full pipeline programmatically.
+
+Entry point (run once to trigger the full pipeline)
+----------------------------------------------------
+::
+
     python -m hotel_prediction.pipelines.training_pipeline
 """
 
-from pathlib import Path
+from __future__ import annotations
 
-from hotel_prediction.components.data_ingestion import (
+import os
+import sys
+
+__root__ = os.getcwd()
+sys.path.insert(0, __root__)
+
+from src.hotel_prediction.components.data_ingestion import (
     CONFIG_PATH,
     DataIngestion,
 )
-from hotel_prediction.components.data_preprocessing import (
+from src.hotel_prediction.components.data_preprocessing import (
     PROCESSED_DIR,
     PROCESSED_TEST_PATH,
     PROCESSED_TRAIN_PATH,
@@ -22,28 +45,41 @@ from hotel_prediction.components.data_preprocessing import (
     TRAIN_FILE_PATH,
     DataPreprocessor,
 )
-from hotel_prediction.components.model_trainer import (
+from src.hotel_prediction.components.model_trainer import (
     MODEL_OUTPUT_PATH,
     MODEL_PARAMS_PATH,
     ModelTrainer,
 )
-from hotel_prediction.logger import get_logger
-from hotel_prediction.utils.io import read_yaml
+from src.hotel_prediction.logger import get_logger
+from src.hotel_prediction.utils.io import read_yaml
 
-logger = get_logger(__name__)
+__all__: list[str] = ["run_training_pipeline"]
+
+_logger = get_logger(__name__)
+
+
+# ── REUSABLE API ──────────────────────────────────────────────────────────────
 
 
 def run_training_pipeline() -> None:
-    """Execute the full end-to-end training pipeline."""
-    logger.info("========== Training Pipeline started ==========")
+    """Execute the full end-to-end training pipeline.
+
+    This function coordinates the execution of the three main components
+    in the correct sequence, passing default file paths configured in each
+    component module.
+
+    Raises:
+        CustomException: If any component in the pipeline fails.
+    """
+    _logger.info("========== Training Pipeline started ==========")
 
     # 1. Data Ingestion
-    logger.info("--- Step 1: Data Ingestion ---")
-    config = read_yaml(CONFIG_PATH)
+    _logger.info("--- Step 1: Data Ingestion ---")
+    config: dict = read_yaml(CONFIG_PATH)
     DataIngestion(config).run()
 
     # 2. Data Preprocessing
-    logger.info("--- Step 2: Data Preprocessing ---")
+    _logger.info("--- Step 2: Data Preprocessing ---")
     DataPreprocessor(
         train_path=TRAIN_FILE_PATH,
         test_path=TEST_FILE_PATH,
@@ -52,7 +88,7 @@ def run_training_pipeline() -> None:
     ).run()
 
     # 3. Model Training
-    logger.info("--- Step 3: Model Training ---")
+    _logger.info("--- Step 3: Model Training ---")
     ModelTrainer(
         train_path=PROCESSED_TRAIN_PATH,
         test_path=PROCESSED_TEST_PATH,
@@ -60,8 +96,10 @@ def run_training_pipeline() -> None:
         model_params_path=MODEL_PARAMS_PATH,
     ).run()
 
-    logger.info("========== Training Pipeline completed ==========")
+    _logger.info("========== Training Pipeline completed ==========")
 
+
+# ── ENTRY POINT (run once per training job) ───────────────────────────────────
 
 if __name__ == "__main__":
     run_training_pipeline()

@@ -6,6 +6,8 @@
 # Data Ingestion
 # ---------------------------------------------------------------------------
 data_ingestion:
+  source_type: "local"                 # "local" or "gcs"
+  local_data_path: "data/Hotel Reservations.csv"
   bucket_name: "my_bucket9789"        # GCS bucket name (override via env: GCP_BUCKET_NAME)
   bucket_file_name: "Hotel_Reservations.csv"
   train_ratio: 0.8                     # 80% train, 20% test

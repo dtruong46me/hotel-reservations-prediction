@@ -44,6 +44,11 @@ This dataset contains historical hotel reservation data, including features such
 | Cloud | GCP Cloud Run + GCS |
 | Data Balancing | SMOTE (imbalanced-learn) |
 
+
+## Demo
+
+![alt text](assets/demo.png)
+
 ---
 
 ## License
