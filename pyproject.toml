@@ -1,0 +1,54 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.backends.legacy:build"
+
+[project]
+name = "hotel-reservations-prediction"
+version = "1.0.0"
+description = "MLOps project — hotel reservation cancellation prediction with LightGBM"
+requires-python = ">=3.10"
+readme = "README.md"
+license = { text = "MIT" }
+
+dependencies = [
+    "pandas",
+    "numpy",
+    "google-cloud-storage",
+    "scikit-learn",
+    "pyyaml",
+    "imbalanced-learn",
+    "lightgbm",
+    "mlflow",
+    "flask",
+    "gunicorn",
+    "joblib",
+    "scipy",
+]
+
+[project.optional-dependencies]
+# Install dev deps with: pip install -e ".[dev]"
+dev = [
+    "pytest>=7.0",
+    "pytest-cov",
+    "black",
+    "isort",
+    "flake8",
+]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-dir]
+"" = "src"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]
+
+[tool.black]
+line-length = 100
+target-version = ["py310", "py311"]
+
+[tool.isort]
+profile = "black"
+line_length = 100

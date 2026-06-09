@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Hotel Reservation Cancellation Predictor — powered by LightGBM ML model">
+    <title>Hotel Reservation Predictor</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="bg-glow"></div>
+
+    <header class="header">
+        <div class="logo">
+            <span class="logo-icon">🏨</span>
+            <span class="logo-text">HotelPredict <span class="logo-badge">ML</span></span>
+        </div>
+        <p class="header-sub">AI-powered reservation cancellation prediction</p>
+    </header>
+
+    <main class="main">
+        <div class="card">
+            <div class="card-header">
+                <h1>Predict Booking Status</h1>
+                <p>Fill in the reservation details below to predict whether a guest will cancel.</p>
+            </div>
+
+            {% if error %}
+            <div class="alert alert-error" role="alert">
+                <span class="alert-icon">⚠️</span>
+                <span>{{ error }}</span>
+            </div>
+            {% endif %}
+
+            <form method="POST" id="prediction-form" class="form" novalidate>
+
+                <div class="form-section">
+                    <h2 class="section-title">📅 Stay Details</h2>
+                    <div class="form-grid">
+
+                        <div class="form-group">
+                            <label for="lead_time">Lead Time <span class="hint">(days before arrival)</span></label>
+                            <input type="number" id="lead_time" name="lead_time"
+                                   min="0" max="500" placeholder="e.g. 45" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="arrival_month">Arrival Month</label>
+                            <select id="arrival_month" name="arrival_month" required>
+                                <option value="" disabled selected>Select month</option>
+                                <option value="1">January</option>
+                                <option value="2">February</option>
+                                <option value="3">March</option>
+                                <option value="4">April</option>
+                                <option value="5">May</option>
+                                <option value="6">June</option>
+                                <option value="7">July</option>
+                                <option value="8">August</option>
+                                <option value="9">September</option>
+                                <option value="10">October</option>
+                                <option value="11">November</option>
+                                <option value="12">December</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="arrival_date">Arrival Date</label>
+                            <select id="arrival_date" name="arrival_date" required>
+                                <option value="" disabled selected>Select day</option>
+                                {% for d in range(1, 32) %}
+                                <option value="{{ d }}">{{ d }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="no_of_week_nights">Weeknights</label>
+                            <input type="number" id="no_of_week_nights" name="no_of_week_nights"
+                                   min="0" max="17" placeholder="e.g. 2" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="no_of_weekend_nights">Weekend Nights</label>
+                            <input type="number" id="no_of_weekend_nights" name="no_of_weekend_nights"
+                                   min="0" max="7" placeholder="e.g. 1" required>
+                        </div>
+
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <h2 class="section-title">🏷️ Room & Meal</h2>
+                    <div class="form-grid">
+
+                        <div class="form-group">
+                            <label for="room_type_reserved">Room Type</label>
+                            <select id="room_type_reserved" name="room_type_reserved" required>
+                                <option value="" disabled selected>Select room</option>
+                                <option value="0">Room Type 1</option>
+                                <option value="1">Room Type 2</option>
+                                <option value="2">Room Type 3</option>
+                                <option value="3">Room Type 4</option>
+                                <option value="4">Room Type 5</option>
+                                <option value="5">Room Type 6</option>
+                                <option value="6">Room Type 7</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="type_of_meal_plan">Meal Plan</label>
+                            <select id="type_of_meal_plan" name="type_of_meal_plan" required>
+                                <option value="" disabled selected>Select plan</option>
+                                <option value="0">Meal Plan 1</option>
+                                <option value="1">Meal Plan 2</option>
+                                <option value="2">Meal Plan 3</option>
+                                <option value="3">Not Selected</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="avg_price_per_room">Avg Price / Room <span class="hint">(€)</span></label>
+                            <input type="number" id="avg_price_per_room" name="avg_price_per_room"
+                                   min="0" step="0.01" placeholder="e.g. 120.50" required>
+                        </div>
+
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <h2 class="section-title">👤 Guest Profile</h2>
+                    <div class="form-grid">
+
+                        <div class="form-group">
+                            <label for="market_segment_type">Market Segment</label>
+                            <select id="market_segment_type" name="market_segment_type" required>
+                                <option value="" disabled selected>Select segment</option>
+                                <option value="0">Aviation</option>
+                                <option value="1">Complementary</option>
+                                <option value="2">Corporate</option>
+                                <option value="3">Offline</option>
+                                <option value="4">Online</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="no_of_special_requests">Special Requests</label>
+                            <input type="number" id="no_of_special_requests" name="no_of_special_requests"
+                                   min="0" max="5" placeholder="e.g. 1" required>
+                        </div>
+
+                    </div>
+                </div>
+
+                <button type="submit" id="predict-btn" class="btn-predict">
+                    <span class="btn-text">Predict Booking Status</span>
+                    <span class="btn-icon">→</span>
+                </button>
+            </form>
+
+            {% if prediction is not none %}
+            <div class="result-card {% if prediction == 1 %}result-keep{% else %}result-cancel{% endif %}"
+                 id="result" role="status" aria-live="polite">
+                <div class="result-icon">{{ '✅' if prediction == 1 else '❌' }}</div>
+                <div class="result-body">
+                    <p class="result-label">Prediction Result</p>
+                    {% if prediction == 1 %}
+                    <p class="result-title">Booking Confirmed</p>
+                    <p class="result-desc">The guest is <strong>not likely to cancel</strong> their reservation.</p>
+                    {% else %}
+                    <p class="result-title">Likely Cancellation</p>
+                    <p class="result-desc">The guest is <strong>likely to cancel</strong> their reservation.</p>
+                    {% endif %}
+                </div>
+            </div>
+            {% endif %}
+
+        </div>
+    </main>
+
+    <footer class="footer">
+        <p>Powered by <strong>LightGBM</strong> · Tracked with <strong>MLflow</strong> · Served by <strong>Flask</strong></p>
+    </footer>
+
+    <script>
+        document.getElementById('prediction-form').addEventListener('submit', function() {
+            const btn = document.getElementById('predict-btn');
+            btn.classList.add('loading');
+            btn.querySelector('.btn-text').textContent = 'Predicting…';
+            btn.disabled = true;
+        });
+
+        // Scroll to result if present
+        const result = document.getElementById('result');
+        if (result) {
+            result.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+    </script>
+</body>
+</html>

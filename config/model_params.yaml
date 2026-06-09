@@ -1,0 +1,45 @@
+# =============================================================================
+# Hotel Reservations Prediction — Model Hyperparameters
+# =============================================================================
+#
+# Distribution specs are parsed by hotel_prediction.utils.common.build_param_distributions()
+# Supported types: randint(low, high), uniform(loc, scale)
+# Plain lists and scalar values are passed through as-is.
+# =============================================================================
+
+lightgbm:
+  # --- RandomizedSearchCV parameter distributions ---
+  param_distributions:
+    n_estimators:
+      type: randint
+      low: 100
+      high: 500
+
+    max_depth:
+      type: randint
+      low: 5
+      high: 50
+
+    learning_rate:
+      type: uniform
+      loc: 0.01
+      scale: 0.2
+
+    num_leaves:
+      type: randint
+      low: 20
+      high: 100
+
+    boosting_type:
+      - gbdt
+      - dart
+      - goss
+
+  # --- RandomizedSearchCV settings ---
+  random_search:
+    n_iter: 2
+    cv: 2
+    n_jobs: -1
+    verbose: 1
+    random_state: 42
+    scoring: accuracy

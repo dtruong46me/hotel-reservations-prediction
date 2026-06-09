@@ -1,8 +1,18 @@
-data_ingestion:
-  bucket_name : "my_bucket9789"
-  bucket_file_name : "Hotel_Reservations.csv"
-  train_ratio : 0.8
+# =============================================================================
+# Hotel Reservations Prediction — Application Configuration
+# =============================================================================
 
+# ---------------------------------------------------------------------------
+# Data Ingestion
+# ---------------------------------------------------------------------------
+data_ingestion:
+  bucket_name: "my_bucket9789"        # GCS bucket name (override via env: GCP_BUCKET_NAME)
+  bucket_file_name: "Hotel_Reservations.csv"
+  train_ratio: 0.8                     # 80% train, 20% test
+
+# ---------------------------------------------------------------------------
+# Data Processing
+# ---------------------------------------------------------------------------
 data_processing:
   categorical_columns:
     - type_of_meal_plan
@@ -11,6 +21,7 @@ data_processing:
     - market_segment_type
     - repeated_guest
     - booking_status
+
   numerical_columns:
     - no_of_adults
     - no_of_children
@@ -24,5 +35,21 @@ data_processing:
     - no_of_previous_bookings_not_canceled
     - avg_price_per_room
     - no_of_special_requests
-  skewness_threshold : 5
-  no_of_features : 10
+
+  skewness_threshold: 5
+  no_of_features: 10
+
+# ---------------------------------------------------------------------------
+# MLflow
+# ---------------------------------------------------------------------------
+mlflow:
+  experiment_name: "hotel-reservations-prediction"
+  tracking_uri: "http://localhost:5000"   # Override via env: MLFLOW_TRACKING_URI
+
+# ---------------------------------------------------------------------------
+# Application (Flask serving)
+# ---------------------------------------------------------------------------
+app:
+  host: "0.0.0.0"
+  port: 8080
+  debug: false
