@@ -1,36 +1,36 @@
 # Quick Start
 
-Chạy thử project **hoàn toàn local** (không cần GCS, không cần Cloud Run) trong dưới 10 phút.
+Run the project **completely local** (no GCS, no Cloud Run) in under 10 minutes.
 
-> **Điều kiện**: Đã hoàn thành [Installation](installation.md).
+> **Prerequisite**: Have completed [Installation](installation.md) and set up the environment.
 
 ---
 
-## Mục lục
+## Table of Contents
 
-- [Option A — Dùng data có sẵn (nhanh nhất)](#option-a--dùng-data-có-sẵn-nhanh-nhất)
-- [Option B — Ingest từ GCS](#option-b--ingest-từ-gcs)
-- [Khởi động Web App](#khởi-động-web-app)
+- [Option A — Using existing data (fastest)](#option-a--using-existing-data-fastest)
+- [Option B — Ingest from GCS](#option-b--ingest-from-gcs)
+- [Launch Web App](#launch-web-app)
 - [Test prediction](#test-prediction)
-- [Xem MLflow UI](#xem-mlflow-ui)
+- [View MLflow UI](#view-mlflow-ui)
 
 ---
 
-## Option A — Dùng data có sẵn (nhanh nhất)
+## Option A — Using existing data (fastest)
 
-Project đã có file `data/Hotel Reservations.csv`. Bỏ qua bước Data Ingestion (GCS), chạy thẳng từ file local:
+Project already has the file `data/Hotel Reservations.csv`. Skip the Data Ingestion step (GCS), and run directly from the local file. This is the fastest way to test the full pipeline and web app.:
 
-### 1. Copy data vào thư mục raw
+### 1. Copy data into artifacts
 
 ```bash
 mkdir -p artifacts/raw
 cp "data/Hotel Reservations.csv" artifacts/raw/raw.csv
 ```
 
-### 2. Tạo train/test split
+### 2. Create train/test split
 
 ```python
-# scripts/split_local.py (chạy 1 lần)
+# scripts/split_local.py (run once to create train/test)
 import pandas as pd
 from sklearn.model_selection import train_test_split
 
@@ -53,7 +53,7 @@ print(f'Train: {len(train)} | Test: {len(test)}')
 "
 ```
 
-### 3. Chạy Preprocessing + Training
+### 3. Run Preprocessing + Training
 
 ```bash
 # Preprocessing (encode, SMOTE, feature selection)
@@ -63,7 +63,7 @@ python -m hotel_prediction.components.data_preprocessing
 python -m hotel_prediction.components.model_trainer
 ```
 
-Hoặc chạy toàn bộ pipeline (bỏ qua bước ingestion):
+Or run the entire pipeline (skip the ingestion step since we already have the CSV):
 
 ```bash
 python -c "
@@ -79,49 +79,49 @@ print('Done! Model saved to:', MODEL_OUTPUT_PATH)
 
 ---
 
-## Option B — Ingest từ GCS
+## Option B — Ingest from GCS
 
-Yêu cầu: GCS bucket đã có `Hotel_Reservations.csv`, credentials đã set trong `.env`.
+Prerequisite: GCS bucket already has `Hotel_Reservations.csv`, credentials set in `.env`.
 
 ```bash
-# Chạy toàn bộ pipeline từ đầu
+# Run the entire pipeline from the beginning (including GCS ingestion)
 python -m hotel_prediction.pipelines.training_pipeline
 ```
 
-Pipeline sẽ tự động:
-1. Tải CSV từ GCS → `artifacts/raw/raw.csv`
+Pipeline will automatically:
+1. Download CSV from GCS → `artifacts/raw/raw.csv`
 2. Split → `train.csv` / `test.csv`
 3. Preprocess → `artifacts/processed/`
 4. Train + evaluate → `artifacts/models/lgbm_model.pkl`
-5. Log tất cả vào MLflow
+5. Log everything into MLflow
 
 ---
 
-## Khởi động Web App
+## Launch Web App
 
 ```bash
 python src/app/main.py
 ```
 
-Mặc định chạy tại: **http://localhost:8080**
+Default running at: **http://localhost:8080**
 
-Nếu muốn thay port:
+If you want to change the port:
 
 ```bash
 APP_PORT=5000 python src/app/main.py
 ```
 
-> **Lưu ý**: App sẽ báo lỗi nếu chưa có model. Hãy chạy training trước (Option A hoặc B).
+> **Note**: App will report an error if no model is available. Please run the training first (Option A or B).
 
 ---
 
 ## Test prediction
 
-### Qua giao diện web
+### Via web interface
 
-Mở trình duyệt tại `http://localhost:8080`, điền form và nhấn **Predict**.
+Open the browser at `http://localhost:8080`, fill the form, and click **Predict**.
 
-### Qua curl (API)
+### Via curl (API)
 
 ```bash
 curl -X POST http://localhost:8080/ \
@@ -146,24 +146,24 @@ curl http://localhost:8080/health
 
 ---
 
-## Xem MLflow UI
+## View MLflow UI
 
-MLflow tự động lưu experiments trong `mlruns/` (local).
+MLflow automatically saves experiments in `mlruns/` (local).
 
 ```bash
-# Mở MLflow UI (terminal khác)
+# Mở MLflow UI (another terminal)
 mlflow ui --port 5000
 ```
 
-Truy cập: **http://localhost:5000**
+Access: **http://localhost:5000**
 
-Bạn sẽ thấy:
-- Experiment runs với parameters, metrics (accuracy, precision, recall, F1)
+You will see:
+- Experiment runs with parameters, metrics (accuracy, precision, recall, F1)
 - Artifacts: model file + datasets
 
 ---
 
-## Cấu trúc artifacts sau khi chạy
+## File structure of artifacts after running
 
 ```
 artifacts/
@@ -180,4 +180,4 @@ artifacts/
 
 ---
 
-Tiếp theo: [Training Guide](training.md) để hiểu chi tiết từng bước pipeline.
+Next: [Training Guide](training.md) to know the pipeline.
