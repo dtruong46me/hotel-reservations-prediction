@@ -1,41 +1,40 @@
 # Installation Guide
 
-Hướng dẫn cài đặt môi trường đầy đủ để chạy project **Hotel Reservations Prediction** — cả local development lẫn production deployment.
-
+Guide to set up the full environment for running the **Hotel Reservations Prediction** project — both for local development and production deployment.
 ---
 
-## Mục lục
+## Table of Contents
 
 - [Prerequisites](#prerequisites)
-- [Bước 1 — Clone repository](#bước-1--clone-repository)
-- [Bước 2 — Cài đặt Python environment](#bước-2--cài-đặt-python-environment)
-- [Bước 3 — Cấu hình environment variables](#bước-3--cấu-hình-environment-variables)
-- [Bước 4 — Cài đặt Google Cloud SDK (nếu deploy)](#bước-4--cài-đặt-google-cloud-sdk-nếu-deploy)
-- [Bước 5 — Xác minh cài đặt](#bước-5--xác-minh-cài-đặt)
+- [Step 1 — Clone repository](#step-1--clone-repository)
+- [Step 2 — Install Python environment](#step-2--install-python-environment)
+- [Step 3 — Configure environment variables](#step-3--configure-environment-variables)
+- [Step 4 — Install Google Cloud SDK (if deploying)](#step-4--install-google-cloud-sdk-if-deploying)
+- [Step 5 — Verify installation](#step-5--verify-installation)
 
 ---
 
 ## Prerequisites
 
-### Bắt buộc (local development)
+### Required (local development)
 
-| Công cụ | Phiên bản tối thiểu | Kiểm tra |
+| Tool | Minimum Version | Check |
 |---------|---------------------|---------|
 | Python | 3.10+ | `python --version` |
 | pip | 23+ | `pip --version` |
-| Git | bất kỳ | `git --version` |
+| Git | any | `git --version` |
 
-### Cần thêm (nếu dùng GCS để ingest data)
+### Additional (if using GCS for data ingestion or MLflow tracking)
 
-| Công cụ | Ghi chú |
+| Tool | Note |
 |---------|---------|
-| Google Cloud account | Cần billing được bật |
-| GCP Service Account Key | JSON key file với quyền `Storage Object Viewer` |
-| Google Cloud SDK (`gcloud`) | Hoặc chỉ cần set `GOOGLE_APPLICATION_CREDENTIALS` |
+| Google Cloud account | Billing must be enabled |
+| GCP Service Account Key | JSON key file with `Storage Object Viewer` permissions |
+| Google Cloud SDK (`gcloud`) | Or simply set `GOOGLE_APPLICATION_CREDENTIALS` |
 
-### Cần thêm (nếu deploy lên Cloud Run)
+### Additional (if deploying to Cloud Run)
 
-| Công cụ | Ghi chú |
+| Tool | Note |
 |---------|---------|
 | Docker Desktop | Chạy background, version 20+ |
 | GCP Project | Cloud Run API + Container Registry API phải được bật |
@@ -43,7 +42,7 @@ Hướng dẫn cài đặt môi trường đầy đủ để chạy project **Ho
 
 ---
 
-## Bước 1 — Clone repository
+## Step 1 — Clone repository
 
 ```bash
 git clone https://github.com/your-org/hotel-reservations-prediction.git
@@ -52,15 +51,32 @@ cd hotel-reservations-prediction
 
 ---
 
-## Bước 2 — Cài đặt Python environment
+## Step 2 — Install Python environment
 
-### Tạo virtual environment
+### Using Conda (Recommended)
 
 ```bash
-# Tạo venv
+# Create conda environment
+conda create -n hotel-prediction python=3.10 -y
+
+# Activate
+conda activate hotel-prediction
+
+# Install dependencies
+pip install --upgrade pip
+pip install -r requirements.txt
+
+# Install package in editable mode
+pip install -e .
+```
+
+### Create virtual environment with `venv` (Alternative)
+
+```bash
+# Create venv
 python -m venv venv
 
-# Kích hoạt
+# Activate
 # macOS / Linux:
 source venv/bin/activate
 
@@ -69,40 +85,35 @@ venv\Scripts\Activate.ps1
 
 # Windows (CMD):
 venv\Scripts\activate.bat
-```
 
-> **Lưu ý**: Luôn đảm bảo `(venv)` xuất hiện ở đầu terminal trước khi chạy bất kỳ lệnh nào.
-
-### Cài đặt dependencies
-
-```bash
-# Runtime dependencies (bắt buộc)
+# Install dependencies
 pip install --upgrade pip
 pip install -r requirements.txt
 
-# Cài đặt package ở chế độ editable
-# (cần thiết để import hotel_prediction và app hoạt động đúng)
+# Install package in editable mode
 pip install -e .
 ```
 
-### Cài thêm dev dependencies (tùy chọn — cho testing, linting)
+> **Note**: Always ensure `(venv)` appears at the beginning of the terminal prompt before running any commands.
+
+### Install additional dev dependencies (optional — for testing, linting)
 
 ```bash
 pip install -e ".[dev]"
 ```
 
-Bao gồm: `pytest`, `pytest-cov`, `black`, `isort`, `flake8`.
+Include: `pytest`, `pytest-cov`, `black`, `isort`, `flake8`.
 
 ---
 
-## Bước 3 — Cấu hình environment variables
+## Step 3 — Configure environment variables
 
 ```bash
 # Copy template
 cp .env.example .env
 ```
 
-Mở `.env` và điền các giá trị:
+Open `.env` and fill in the values for your environment. Example:
 
 ```env
 # Google Cloud
@@ -110,24 +121,24 @@ GCP_PROJECT_ID=your-gcp-project-id
 GCP_BUCKET_NAME=your-gcs-bucket-name
 GOOGLE_APPLICATION_CREDENTIALS=/absolute/path/to/your/service-account-key.json
 
-# MLflow (bỏ qua nếu chưa cần tracking)
+# MLflow (skip if not needed)
 MLFLOW_TRACKING_URI=http://localhost:5000
 
-# Flask App (optional — mặc định 0.0.0.0:8080)
+# Flask App (optional — default 0.0.0.0:8080)
 APP_HOST=0.0.0.0
 APP_PORT=8080
 FLASK_DEBUG=false
 ```
 
-> **Quan trọng**: File `.env` đã được gitignore. Không commit file này lên repository.
+> **Important**: File `.env` must be gitignore. Do not commit this file to repository.
 
-Nếu bạn đang dùng **Linux/macOS**, load env vars vào shell:
+If using **Linux/macOS**, load env vars into the shell:
 
 ```bash
 export $(grep -v '^#' .env | xargs)
 ```
 
-Nếu dùng **Windows PowerShell**:
+If using **Windows PowerShell**:
 
 ```powershell
 Get-Content .env | Where-Object { $_ -notmatch '^#' -and $_ -ne '' } | ForEach-Object {
@@ -138,7 +149,7 @@ Get-Content .env | Where-Object { $_ -notmatch '^#' -and $_ -ne '' } | ForEach-O
 
 ---
 
-## Bước 4 — Cài đặt Google Cloud SDK (nếu deploy)
+## Step 4 — Install Google Cloud SDK (if deploying or using GCS)
 
 ### macOS
 
@@ -168,9 +179,9 @@ gcloud config set project YOUR_PROJECT_ID
 
 ---
 
-## Bước 5 — Xác minh cài đặt
+## Step 5 — Verify Installation
 
-Chạy lệnh sau để kiểm tra toàn bộ:
+Run the following command to check everything is set up correctly:
 
 ```bash
 python - <<'EOF'
@@ -191,4 +202,4 @@ print(f"✅ model_params.yaml loaded: {list(dists.keys())}")
 EOF
 ```
 
-Nếu tất cả hiện `✅`, bạn đã cài đặt thành công. Tiếp theo xem [Quick Start](quickstart.md).
+If all lines show `✅`, you have successfully installed the package. Next, see [Quick Start](quickstart.md).

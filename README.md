@@ -1,6 +1,6 @@
-# Hotel Reservations Prediction 🏨
+# Hotel Reservations Prediction
 
-Dự đoán khả năng hủy đặt phòng khách sạn sử dụng **LightGBM**, được theo dõi bởi **MLflow**, phục vụ qua **Flask**, và triển khai lên **Google Cloud Run** thông qua **Jenkins CI/CD**.
+Predict hotel reservation cancellations using **LightGBM**, tracked with **MLflow**, served via **Flask**, and deployed on **Google Cloud Run** through **Jenkins CI/CD**.
 
 ---
 
@@ -18,13 +18,19 @@ Raw CSV (GCS)  →  Training Pipeline  →  LightGBM Model (.pkl)
 
 | Tài liệu | Mô tả |
 |----------|-------|
-| [Installation](docs/installation.md) | Cài đặt môi trường, dependencies, credentials |
-| [Quick Start](docs/quickstart.md) | Chạy thử local trong < 10 phút |
-| [Training Guide](docs/training.md) | Pipeline ML, config, MLflow tracking |
-| [Architecture](docs/architecture.md) | Cấu trúc project, thiết kế, data flow |
-| [Deployment Guide](docs/deployment.md) | Full A–Z: GCP + Jenkins + Cloud Run |
+| [Installation](docs/installation.md) | Install environment, dependencies, credentials |
+| [Quick Start](docs/quickstart.md) | Quick start guide for local testing |
+| [Training Guide](docs/training.md) | Machine learning pipeline, configuration, MLflow tracking |
+| [Architecture](docs/architecture.md) | Project structure, design, data flow |
+| [Deployment Guide](docs/deployment.md) | Full deployment guide: GCP + Jenkins + Cloud Run |
 
 ---
+
+## Dataset
+
+The dataset is sourced from Kaggle: [Hotel Reservations Dataset](https://www.kaggle.com/datasets/ahsan81/hotel-reservations-classification-dataset). 
+
+This dataset contains historical hotel reservation data, including features such as booking details, customer information, and whether the reservation was canceled.
 
 ## Tech Stack
 
